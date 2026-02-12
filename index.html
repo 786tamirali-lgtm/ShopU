@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
+    <title>ShopU - आपका ऑनलाइन स्टोर</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .shop-header {
+            text-align: center;
+            padding: 30px 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .shop-header h1 {
+            font-size: 2.8em;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .shop-header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+            font-weight: 300;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+        }
+
+        .product-image {
+            height: 250px;
+            background: linear-gradient(45deg, #f3f3f3, #eaeaea);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.1);
+        }
+
+        .no-image {
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 1.1em;
+        }
+
+        .product-info {
+            padding: 20px;
+            background: white;
+        }
+
+        .product-name {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .product-price {
+            font-size: 1.8em;
+            color: #2ecc71;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .product-price::before {
+            content: '₹';
+            font-size: 1em;
+            color: #27ae60;
+        }
+
+        .product-description {
+            color: #666;
+            font-size: 0.95em;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .buy-btn {
+            width: 100%;
+            padding: 12px 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .buy-btn:hover {
+            background: linear-gradient(45deg, #764ba2, #667eea);
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(102,126,234,0.4);
+        }
+
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(45deg, #25D366, #128C7E);
+            color: white;
+            padding: 18px 40px;
+            border-radius: 60px;
+            text-decoration: none;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin: 30px auto;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(37,211,102,0.3);
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .whatsapp-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(37,211,102,0.4);
+            background: linear-gradient(45deg, #128C7E, #25D366);
+        }
+
+        .sheet-link {
+            display: inline-block;
+            background: white;
+            color: #4285F4;
+            padding: 14px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 20px auto;
+            border: 2px solid #4285F4;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+            box-shadow: 0 5px 20px rgba(66,133,244,0.2);
+        }
+
+        .sheet-link:hover {
+            background: #4285F4;
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: white;
+            font-size: 1.5em;
+            grid-column: 1 / -1;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 1.3em;
+            background: rgba(231, 76, 60, 0.9);
+            border-radius: 15px;
+            margin: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .featured-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.8em;
+            font-weight: bold;
+            z-index: 10;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .button-container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .product-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .shop-header h1 {
+                font-size: 2em;
+            }
+            
+            .product-grid {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+            
+            .whatsapp-btn {
+                font-size: 1.1em;
+                padding: 15px 30px;
+            }
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #764ba2, #667eea);
+        }
+    </style>
+</head>
+<body>
+    <div class="shop-header">
+        <h1>🛍️ ShopU</h1>
+        <p>✨ Premium Products at Best Prices ✨</p>
+        <div style="margin-top: 15px; color: rgba(255,255,255,0.9);">
+            ⭐ Free Shipping | 🔒 Secure Payment | ✅ Genuine Products
+        </div>
+    </div>
+
+    <div id="product-list" class="product-grid">
+        <div class="loading">लोड हो रहा है शानदार प्रोडक्ट्स</div>
+    </div>
+
+    <div style="text-align: center; position: relative; z-index: 100;">
+        <a href="https://wa.me/918797221991?text=नमस्ते! 🛍️ मैं ShopU से ऑर्डर करना चाहता/चाहती हूँ। कृपया मुझे नवीनतम प्रोडक्ट्स और ऑफर्स के बारे में बताएं।" 
+           target="_blank" 
+           class="whatsapp-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="white" style="margin-right: 12px;">
+                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.588-5.946 0-6.556 5.332-11.891 11.893-11.891 3.181 0 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.481 8.403 0 6.556-5.332 11.891-11.893 11.891-2.01 0-3.98-.51-5.725-1.479l-6.268 1.697zm6.514-4.22c1.558.928 3.31 1.42 5.1 1.42 5.534 0 10.04-4.505 10.04-10.04 0-2.682-1.045-5.203-2.94-7.098s-4.418-2.942-7.1-2.942c-5.535 0-10.041 4.506-10.041 10.041 0 1.866.516 3.687 1.491 5.278l-1.018 3.715 3.848-1.039z"/>
+            </svg>
+            🛒 ऑर्डर करें WhatsApp पर
+        </a>
+    </div>
+
+    <div style="text-align: center; margin: 40px 0;">
+        <a href="https://docs.google.com/spreadsheets/d/1YHp34D1uNEpa6xsKHgPZiH2wgl8s3oCc5dxGbkxYgHA/edit?usp=drivesdk" 
+           target="_blank" 
+           class="sheet-link">
+            📊 नया प्रोडक्ट जोड़ें (Google Sheet)
+        </a>
+    </div>
+
+    <script>
+        // Sheety API URL
+        const url = 'https://api.sheety.co/fe3c8e6fa84d7f88560b1976c0685f08/shopU/sheet1';
+        
+        // Product container
+        const container = document.getElementById('product-list');
+
+        // Featured products ko randomly highlight karna
+        function getRandomFeatured() {
+            return Math.random() > 0.7; // 30% products featured honge
+        }
+
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data.sheet1 || data.sheet1.length === 0) {
+                    container.innerHTML = '<div class="error-message">😕 कोई प्रोडक्ट नहीं मिला। कृपया Google Sheet में प्रोडक्ट जोड़ें।</div>';
+                    return;
+                }
+
+                container.innerHTML = ''; 
+
+                // Animation delay ke liye
+                let delay = 0;
+
+                data.sheet1.forEach((item, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.style.animationDelay = `${delay}s`;
+                    delay += 0.1;
+
+                    const isFeatured = getRandomFeatured();
+                    
+                    // Image ya no-image block
+                    let imageHtml = '';
+                    if (item.imageUrl && item.imageUrl.trim() !== '') {
+                        imageHtml = `<img src="${item.imageUrl}" alt="${item.name || 'Product'}" loading="lazy">`;
+                    } else {
+                        imageHtml = `<div class="no-image">📸 कोई इमेज नहीं</div>`;
+                    }
+
+                    // Description agar available ho to
+                    const description = item.description || 'प्रीमियम क्वालिटी प्रोडक्ट। बेस्ट प्राइस की गारंटी।';
+                    
+                    // Stock status (random demo ke liye)
+                    const inStock = Math.random() > 0.2;
+                    const stockStatus = inStock ? '✅ स्टॉक में' : '⚠️ लिमिटेड स्टॉक';
+                    
+                    // Rating (random demo ke liye)
+                    const rating = (Math.random() * 2 + 3).toFixed(1);
+                    const ratingStars = '⭐'.repeat(Math.floor(rating));
+
+                    // WhatsApp order link with product details
+                    const whatsappOrderLink = `https://wa.me/918797221991?text=नमस्ते!%20मैं%20ShopU%20से%20'${encodeURIComponent(item.name || 'प्रोडक्ट')}'%20ऑर्डर%20करना%20चाहता/चाहती%20हूँ।%20₹${item.price || 0}%20वाले%20प्रोडक्ट%20के%20बारे%20में%20जानकारी%20चाहिए।`;
+
+                    card.innerHTML = `
+                        <div class="product-image">
+                            ${isFeatured ? '<span class="featured-badge">🔥 Featured</span>' : ''}
+                            ${imageHtml}
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">${item.name || 'अनाम प्रोडक्ट'}</h3>
+                            <div class="product-price">${item.price || '0'}</div>
+                            <div class="product-description">${description}</div>
+                            <div class="product-stats">
+                                <span>${rating} ${ratingStars}</span>
+                                <span>${stockStatus}</span>
+                            </div>
+                            <button class="buy-btn" onclick="window.open('${whatsappOrderLink}', '_blank')">
+                                🛒 अभी खरीदें
+                                <span style="font-size: 1.2em;">→</span>
+                            </button>
+                        </div>
+                    `;
+                    
+                    container.appendChild(card);
+                });
+
+                // Total products count show karo
+                const totalProducts = data.sheet1.length;
+                const header = document.querySelector('.shop-header p');
+                header.innerHTML = `✨ ${totalProducts} Premium Products at Best Prices ✨`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                container.innerHTML = `
+                    <div class="error-message">
+                        <div style="font-size: 2em; margin-bottom: 15px;">😔</div>
+                        <div style="font-size: 1.3em; margin-bottom: 10px;">डेटा लोड नहीं हो पाया!</div>
+                        <div style="font-size: 1em; opacity: 0.9;">कृपया इंटरनेट कनेक्शन चेक करें या बाद में पुनः प्रयास करें।</div>
+                        <button onclick="location.reload()" style="margin-top: 20px; padding: 12px 30px; background: white; color: #e74c3c; border: none; border-radius: 25px; font-size: 1em; font-weight: bold; cursor: pointer; transition: 0.3s;">
+                            🔄 पुनः प्रयास करें
+                        </button>
+                    </div>
+                `;
+            });
+
+        // Lazy loading ke liye intersection observer
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = 1;
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+
+            document.querySelectorAll('.product-card').forEach(card => {
+                card.style.opacity = 0;
+                card.style.transform = 'translateY(20px)';
+                observer.observe(card);
+            });
+        }
+    </script>
+
+    <!-- Footer -->
+    <div style="text-align: center; padding: 40px 20px 20px; color: rgba(255,255,255,0.7); font-size: 0.9em; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 50px;">
+        <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin-bottom: 20px;">
+            <span>🚚 फ्री शिपिंग</span>
+            <span>💳 सिक्योर पेमेंट</span>
+            <span>🔄 7 दिन रिटर्न</span>
+            <span>🎁 गिफ्ट रैपिंग</span>
+        </div>
+        <p>© 2024 ShopU - आपका विश्वसनीय ऑनलाइन पार्टनर</p>
+        <p style="margin-top: 10px; font-size: 0.8em;">Made with ❤️ in India</p>
+    </div>
+</body>
+</html>
