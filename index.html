@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopU - तामीर अली डिजिटल महासंग्रह</title>
+    <style>
+        /* सुंदर और प्रोफेशनल डिजाइन */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; color: #333; }
+        .header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; padding: 30px; max-width: 1300px; margin: 0 auto; }
+        .card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.1); transition: 0.3s; display: flex; flex-direction: column; }
+        .card:hover { transform: translateY(-8px); }
+        .img-box { height: 230px; position: relative; background: #eee; }
+        .img-box img { width: 100%; height: 100%; object-fit: cover; }
+        .badge { position: absolute; top: 12px; right: 12px; background: #ff4757; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8em; font-weight: bold; }
+        .info { padding: 20px; flex-grow: 1; text-align: center; display: flex; flex-direction: column; justify-content: space-between; }
+        .desc { font-size: 0.9em; color: #666; margin-bottom: 10px; line-height: 1.4; }
+        .price { font-size: 1.6em; color: #2ecc71; font-weight: bold; margin: 10px 0; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: bold; font-size: 1.1em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; text-decoration: none; }
+        .btn-wa { background: #25D366; color: white; }
+        .btn-book { background: #764ba2; color: white; }
+        .loading { text-align: center; padding: 50px; font-size: 1.2em; grid-column: 1/-1; color: #764ba2; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🛍️ ShopU - तामीर अली</h1>
+        <p>अक्ल की जीत | खुदा की तलाश | डिजिटल व्यापार</p>
+    </div>
+
+    <div id="product-list" class="product-grid">
+        <div class="loading">सिस्टम लोड हो रहा है...</div>
+    </div>
+
+    <script>
+        // आपकी शीटी API लिंक [cite: 2026-02-23]
+        const sheetyUrl = 'https://api.sheety.co/fe3c8e6fa84d7f88560b1976c0685f08/shopU/sheet1';
+        let allItems = [];
+
+        async function fetchShop() {
+            try {
+                const response = await fetch(sheetyUrl);
+                const data = await response.json();
+                allItems = data.sheet1;
+                renderItems();
+            } catch (error) {
+                document.getElementById('product-list').innerHTML = '<div class="loading">कनेक्शन एरर! कृपया दोबारा प्रयास करें।</div>';
+            }
+        }
+
+        function renderItems() {
+            const container = document.getElementById('product-list');
+            container.innerHTML = '';
+
+            allItems.forEach((item, index) => {
+                // चेक करें कि क्या यह किताब है [cite: 2026-01-26]
+                const isBook = item.category && item.category.toLowerCase() === 'book';
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="img-box">
+                        <img src="${item.imageUrl || 'https://via.placeholder.com/300'}" alt="Product">
+                        ${item.category ? `<span class="badge">${item.category}</span>` : ''}
+                    </div>
+                    <div class="info">
+                        <div>
+                            <h3>${item.name || 'प्रोडक्ट'}</h3>
+                            <p class="desc">${item.description || 'प्रीमियम क्वालिटी प्रोडक्ट।'}</p>
+                        </div>
+                        <div>
+                            <div class="price">₹${item.price || 0}</div>
+                            ${isBook ? 
+                                `<button class="btn btn-book" onclick="checkLock(${index})">📖 पूरी किताब पढ़ें</button>` : 
+                                `<a href="https://wa.me/918797221991?text=नमस्ते तामीर अली! मुझे *'${item.name}'* का ऑर्डर देना है।" target="_blank" class="btn btn-wa">🛒 WhatsApp ऑर्डर</a>`
+                            }
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // अक्ल की जीत लॉक फंक्शन [cite: 2026-01-18, 2026-02-07]
+        window.checkLock = (idx) => {
+            const product = allItems[idx];
+            const correctKey = product.keyCode || "SVM@786"; // आपकी शीट से चाबी उठाएगा [cite: 2026-02-07]
+            
+            let userKey = prompt(`🔐 एक्सेस लॉक!\nकिताब: ${product.name}\n\nयदि आपके पास कोड नहीं है, तो 'Cancel' दबाएं और WhatsApp पर संपर्क करें।\n\nकोड यहाँ दर्ज करें:`);
+
+            if (userKey === correctKey) {
+                alert("सफलता! अक्ल की जीत हुई।");
+                window.open(product.productLink, '_blank');
+            } else if (userKey !== null) {
+                // गलत कोड या Cancel होने पर WhatsApp ऑर्डर [cite: 2026-01-25]
+                const waMsg = `नमस्ते तामीर अली!%0Aमुझे आपकी किताब *'${product.name}'* खरीदनी है।%0Aकीमत: ₹${product.price}%0Aकृपया मुझे भुगतान की जानकारी और कोड दें।`;
+                
+                if(confirm("गलत कोड! क्या आप इस किताब को खरीदने के लिए तामीर अली को WhatsApp पर ऑर्डर मैसेज भेजना चाहते हैं?")) {
+                    window.open(`https://wa.me/918797221991?text=${waMsg}`, '_blank');
+                }
+            }
+        };
+
+        fetchShop();
+    </script>
+</body>
+</html>
