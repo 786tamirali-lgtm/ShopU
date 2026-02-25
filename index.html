@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopU - तामीर अली महासंग्रह</title>
+    <style>
+        /* सुंदर और प्रोफेशनल डिजाइन */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f0f2f5; font-family: 'Segoe UI', sans-serif; color: #333; }
+        .header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 30px 20px; text-align: center; border-radius: 0 0 25px 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .product-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 25px; max-width: 1200px; margin: 0 auto; }
+        .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 6px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); }
+        .img-box { height: 220px; position: relative; background: #eee; }
+        .img-box img { width: 100%; height: 100%; object-fit: cover; }
+        .badge { position: absolute; top: 10px; right: 10px; background: #ff4757; color: white; padding: 4px 12px; border-radius: 15px; font-size: 0.8em; font-weight: bold; }
+        .info { padding: 15px; flex-grow: 1; text-align: center; }
+        .price { font-size: 1.5em; color: #2ecc71; font-weight: bold; margin: 10px 0; }
+        .qty-row { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 15px; }
+        .qty-btn { width: 35px; height: 35px; border: 1px solid #ddd; border-radius: 50%; cursor: pointer; background: #f8f9fa; font-weight: bold; font-size: 1.2em; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1em; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; text-decoration: none; }
+        .btn-wa { background: #25D366; color: white; margin-bottom: 8px; }
+        .btn-book { background: #764ba2; color: white; }
+        .loading { text-align: center; padding: 50px; font-size: 1.2em; color: #764ba2; grid-column: 1/-1; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🛍️ ShopU - तामीर अली</h1>
+        <p>अक्ल की जीत - आपका डिजिटल बाज़ार</p>
+    </div>
+
+    <div id="product-list" class="product-list">
+        <div class="loading">दुकान सज रही है...</div>
+    </div>
+
+    <script>
+        // आपकी गूगल शीट का API लिंक [cite: 2026-02-23]
+        const sheetyUrl = 'https://api.sheety.co/fe3c8e6fa84d7f88560b1976c0685f08/shopU/sheet1';
+        let allProducts = [];
+
+        async function fetchShopData() {
+            try {
+                const response = await fetch(sheetyUrl);
+                const data = await response.json();
+                allProducts = data.sheet1;
+                renderProducts();
+            } catch (error) {
+                document.getElementById('product-list').innerHTML = "डेटा लोड नहीं हो पाया।";
+            }
+        }
+
+        function renderProducts() {
+            const container = document.getElementById('product-list');
+            container.innerHTML = '';
+
+            allProducts.forEach((item, index) => {
+                const isBook = item.category && item.category.toLowerCase() === 'book';
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="img-box">
+                        <img src="${item.imageUrl || 'https://via.placeholder.com/300'}" alt="Product Preview">
+                        ${item.category ? `<span class="badge">${item.category}</span>` : ''}
+                    </div>
+                    <div class="info">
+                        <h3 style="margin-bottom:5px;">${item.name}</h3>
+                        <p style="font-size:0.85em; color:#666; margin-bottom:10px;">${item.description || 'प्रीमियम उत्पाद'}</p>
+                        <div class="price">₹${item.price}</div>
+                        
+                        <div class="qty-row">
+                            <button class="qty-btn" onclick="updateQty(${index}, -1)">-</button>
+                            <b id="q-${index}" style="min-width:20px;">1</b>
+                            <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
+                        </div>
+
+                        <button class="btn btn-wa" onclick="sendOrder(${index})">🛒 WhatsApp ऑर्डर</button>
+                        
+                        ${isBook ? `<button class="btn btn-book" onclick="openBook(${index})">🔐 चाबी डालकर पढ़ें</button>` : ''}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        window.updateQty = (idx, change) => {
+            const el = document.getElementById(`q-${idx}`);
+            let val = parseInt(el.innerText) + change;
+            if (val >= 1) el.innerText = val;
+        }
+
+        // वही पुराना प्यारा मैसेज फॉर्मेट [cite: 2026-01-25]
+        window.sendOrder = (idx) => {
+            const item = allProducts[idx];
+            const qty = document.getElementById(`q-${idx}`).innerText;
+            const total = item.price * qty;
+            const message = `नमस्ते तामीर अली! मुझे ShopU से ऑर्डर करना है:%0A%0A📦 *प्रोडक्ट:* ${item.name}%0A🔢 *मात्रा:* ${qty}%0A💰 *कुल कीमत:* ₹${total}%0A%0Aकृपया मेरा ऑर्डर कन्फर्म करें और मुझे लिंक प्रदान करें।`;
+            window.open(`https://wa.me/918797221991?text=${message}`, '_blank');
+        }
+
+        // सुरक्षित चाबी वाला फंक्शन [cite: 2026-02-07]
+        window.openBook = (idx) => {
+            const item = allProducts[idx];
+            const userKey = prompt(`🔐 इस 'महासंग्रह' की चाबी (Code) दर्ज करें:`);
+            
+            if (userKey === (item.keyCode || "SVM@786")) {
+                alert("सफलता! अक्ल की जीत हुई।");
+                if (item.productLink) {
+                    let link = item.productLink.trim();
+                    if (!link.startsWith('http')) link = 'https://' + link;
+                    
+                    // पॉप-अप ब्लॉकर से बचने का तरीका
+                    const a = document.createElement('a');
+                    a.href = link;
+                    a.target = '_blank';
+                    a.click();
+                } else {
+                    alert("त्रुटि: लिंक नहीं मिला!");
+                }
+            } else if (userKey !== null) {
+                alert("गलत चाबी! कृपया पहले भुगतान करके WhatsApp पर चाबी मांगें।");
+            }
+        }
+
+        fetchShopData();
+    </script>
+</body>
+</html>
