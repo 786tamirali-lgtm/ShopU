@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopU - भविष्य का मार्केट</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; color: #333; }
+        
+        /* Header & Search */
+        .shop-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center; color: white; border-radius: 0 0 30px 30px; }
+        .search-box { margin-top: 20px; max-width: 500px; margin-left: auto; margin-right: auto; position: relative; }
+        .search-box input { width: 100%; padding: 15px 25px; border-radius: 50px; border: none; font-size: 1.1em; box-shadow: 0 10px 25px rgba(0,0,0,0.2); outline: none; }
+
+        /* Product Grid */
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; padding: 30px; max-width: 1300px; margin: 0 auto; }
+        .product-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.08); transition: 0.3s; display: flex; flex-direction: column; }
+        .product-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.15); }
+        
+        .img-container { height: 220px; background: #eee; position: relative; }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .badge { position: absolute; top: 10px; right: 10px; background: #ff4757; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.8em; font-weight: bold; }
+
+        .product-info { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .product-name { font-size: 1.25em; margin-bottom: 8px; color: #2d3436; }
+        .product-price { font-size: 1.5em; color: #2ecc71; font-weight: bold; margin-bottom: 15px; }
+
+        /* Quantity & Buttons */
+        .qty-row { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; background: #f1f2f6; border-radius: 10px; padding: 8px; }
+        .qty-btn { background: #764ba2; color: white; border: none; width: 30px; height: 30px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .buy-btn { background: #25D366; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 1.1em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; }
+        
+        .loading { text-align: center; padding: 50px; font-size: 1.2em; grid-column: 1/-1; }
+    </style>
+</head>
+<body>
+
+    <div class="shop-header">
+        <h1>🛍️ ShopU - महासंग्रह मार्केट</h1>
+        <p>अक्ल की जीत, खुदा की तलाश और बेहतरीन सेवा</p>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="प्रोडक्ट का नाम लिखें..." onkeyup="filterProducts()">
+        </div>
+    </div>
+
+    <div id="product-list" class="product-grid">
+        <div class="loading">सिस्टम तैयार हो रहा है...</div>
+    </div>
+
+    <script>
+        const sheetyUrl = 'https://api.sheety.co/fe3c8e6fa84d7f88560b1976c0685f08/shopU/sheet1';
+        let allProducts = [];
+
+        // भविष्य की सुरक्षा: डेटा लोड करना
+        async function fetchProducts() {
+            try {
+                const response = await fetch(sheetyUrl);
+                const data = await response.json();
+                allProducts = data.sheet1;
+                displayProducts(allProducts);
+            } catch (error) {
+                document.getElementById('product-list').innerHTML = '<div class="loading">कनेक्शन में समस्या। कृपया इंटरनेट चेक करें।</div>';
+            }
+        }
+
+        // प्रोडक्ट्स दिखाने का फंक्शन
+        function displayProducts(products) {
+            const container = document.getElementById('product-list');
+            container.innerHTML = '';
+
+            if (products.length === 0) {
+                container.innerHTML = '<div class="loading">क्षमा करें, कोई सामान नहीं मिला।</div>';
+                return;
+            }
+
+            products.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                const isOutOfStock = item.stock == 0; // शीट में stock कॉलम जोड़ें (वैकल्पिक)
+
+                card.innerHTML = `
+                    <div class="img-container">
+                        <img src="${item.imageUrl || 'https://via.placeholder.com/300'}" alt="Product">
+                        ${item.category ? `<span class="badge">${item.category}</span>` : ''}
+                    </div>
+                    <div class="product-info">
+                        <div>
+                            <h3 class="product-name">${item.name}</h3>
+                            <div class="product-price">₹${item.price}</div>
+                        </div>
+                        <div>
+                            <div class="qty-row">
+                                <button class="qty-btn" onclick="updateQty(${index}, -1)">-</button>
+                                <b id="qty-count-${index}">1</b>
+                                <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
+                            </div>
+                            <button class="buy-btn" onclick="sendWhatsAppOrder(${index})" ${isOutOfStock ? 'disabled style="background:#ccc"' : ''}>
+                                ${isOutOfStock ? 'स्टॉक खत्म' : 'WhatsApp ऑर्डर'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // सर्च करने का लॉजिक (अक्ल की जीत)
+        function filterProducts() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allProducts.filter(p => p.name.toLowerCase().includes(term));
+            displayProducts(filtered);
+        }
+
+        // मात्रा अपडेट करना
+        window.updateQty = (index, change) => {
+            const el = document.getElementById(`qty-count-${index}`);
+            let val = parseInt(el.innerText) + change;
+            if (val >= 1) el.innerText = val;
+        };
+
+        // भविष्य की तैयारी: WhatsApp मैसेज लॉजिक
+        window.sendWhatsAppOrder = (index) => {
+            const item = allProducts[index];
+            const qty = document.getElementById(`qty-count-${index}`).innerText;
+            const total = item.price * qty;
+            const phone = "918797221991"; 
+            const text = `*नया ऑर्डर (ShopU)*%0A--------------------%0A*प्रोडक्ट:* ${item.name}%0A*मात्रा:* ${qty}%0A*कुल कीमत:* ₹${total}%0A--------------------%0A_अक्ल की जीत, खुदा की तलाश_`;
+            window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+        };
+
+        fetchProducts();
+    </script>
+</body>
+</html>
