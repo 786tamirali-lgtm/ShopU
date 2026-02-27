@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopU - तामीर अली (मल्टी-ऑर्डर स्टोर)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f4f7fc; padding-bottom: 100px; }
+        .header { background: linear-gradient(145deg, #1e2b4f, #2a3f6e); color: white; padding: 30px 20px; text-align: center; border-radius: 0 0 40px 40px; }
+        
+        .product-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: 0 auto; }
+        
+        .card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; position: relative; border: 1px solid #eee; }
+        .img-box { height: 200px; cursor: zoom-in; position: relative; }
+        .img-box img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .info { padding: 15px; text-align: center; }
+        .price { font-size: 1.4rem; font-weight: bold; color: #2ecc71; margin: 10px 0; }
+        
+        /* क्वांटिटी और कार्ट बटन */
+        .cart-controls { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .qty-input { display: flex; align-items: center; justify-content: center; gap: 15px; background: #f8fafd; padding: 8px; border-radius: 30px; }
+        .qty-btn { width: 30px; height: 30px; border: none; border-radius: 50%; background: white; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
+        .btn-add { background: #ffb347; color: #1e2b4f; border: none; padding: 12px; border-radius: 30px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-add:hover { background: #ffa000; }
+        
+        .btn-book { background: #764ba2; color: white; padding: 10px; border-radius: 30px; border: none; margin-top: 5px; cursor: pointer; font-size: 0.9rem; }
+
+        /* नीचे वाली कार्ट पट्टी */
+        .cart-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #1e2b4f; color: white; padding: 15px 25px; display: none; justify-content: space-between; align-items: center; z-index: 1000; box-shadow: 0 -5px 15px rgba(0,0,0,0.3); border-radius: 20px 20px 0 0; }
+        .btn-checkout { background: #25D366; color: white; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; cursor: pointer; }
+
+        /* ज़ूम मॉडल */
+        .modal { display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
+        .modal img { max-width: 90%; max-height: 80%; border-radius: 10px; }
+        .close { position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>🛍️ ShopU - अक्ल की जीत</h1>
+    <p>तामीर अली का 'महासंग्रह' | मल्टी-आइटम स्टोर</p>
+</div>
+
+<div id="imageModal" class="modal" onclick="this.style.display='none'">
+    <span class="close">&times;</span>
+    <img id="zoomedImg" src="">
+</div>
+
+<div id="product-list" class="product-list">
+    <p style="text-align:center; grid-column: 1/-1;">दुकान सज रही है...</p>
+</div>
+
+<div id="cartBar" class="cart-bar">
+    <div>
+        <span id="cartCount">0</span> आइटम | <b>₹<span id="cartTotal">0</span></b>
+    </div>
+    <button class="btn-checkout" onclick="sendMultiOrder()">WhatsApp ऑर्डर करें 🚀</button>
+</div>
+
+<script>
+    const sheetyUrl = 'https://api.sheety.co/fe3c8e6fa84d7f88560b1976c0685f08/shopU/sheet1';
+    let products = [];
+    let cart = {}; // कार्ट स्टोर करने के लिए
+
+    async function loadShop() {
+        const res = await fetch(sheetyUrl);
+        const data = await res.json();
+        products = data.sheet1;
+        render();
+    }
+
+    function render() {
+        const container = document.getElementById('product-list');
+        container.innerHTML = '';
+        products.forEach((item, index) => {
+            const cat = item.category ? item.category.toLowerCase().trim() : "";
+            const isBook = cat === 'book';
+
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="img-box" onclick="openZoom('${item.imageUrl}')">
+                    <img src="${item.imageUrl}" alt="Product">
+                    <div style="position:absolute; bottom:5px; right:5px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 6px; border-radius:5px;">🔍 बड़ा देखें</div>
+                </div>
+                <div class="info">
+                    <h3>${item.name}</h3>
+                    <div class="price">₹${item.price}</div>
+                    
+                    <div class="cart-controls">
+                        <div class="qty-input">
+                            <button class="qty-btn" onclick="updateQty(${index}, -1)">−</button>
+                            <b id="q-${index}">1</b>
+                            <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
+                        </div>
+                        <button class="btn-add" onclick="addToCart(${index})">🛒 झोले में डालें (Add)</button>
+                        ${isBook ? `<button class="btn-book" onclick="checkLock(${index})">🔐 चाबी से खोलें</button>` : ''}
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    window.updateQty = (idx, delta) => {
+        const el = document.getElementById(`q-${idx}`);
+        let curr = parseInt(el.innerText);
+        if (curr + delta >= 1) el.innerText = curr + delta;
+    };
+
+    window.addToCart = (idx) => {
+        const item = products[idx];
+        const qty = parseInt(document.getElementById(`q-${idx}`).innerText);
+        const price = parseInt(String(item.price).replace(/[^0-9]/g, '')) || 0;
+
+        cart[idx] = { name: item.name, qty: qty, price: price, total: price * qty };
+        updateCartBar();
+    };
+
+    function updateCartBar() {
+        const bar = document.getElementById('cartBar');
+        const countEl = document.getElementById('cartCount');
+        const totalEl = document.getElementById('cartTotal');
+        
+        let totalItems = 0;
+        let totalPrice = 0;
+        
+        for (let key in cart) {
+            totalItems += 1;
+            totalPrice += cart[key].total;
+        }
+
+        if (totalItems > 0) {
+            bar.style.display = 'flex';
+            countEl.innerText = totalItems;
+            totalEl.innerText = totalPrice;
+        } else {
+            bar.style.display = 'none';
+        }
+    }
+
+    window.sendMultiOrder = () => {
+        let orderList = "नमस्ते तामीर अली! मुझे ये सब ऑर्डर करना है:%0A%0A";
+        let grandTotal = 0;
+
+        for (let key in cart) {
+            const item = cart[key];
+            orderList += `📦 *${item.name}*%0A🔢 मात्रा: ${item.qty} | कीमत: ₹${item.total}%0A------------------%0A`;
+            grandTotal += item.total;
+        }
+
+        orderList += `%0A💰 *कुल बिल: ₹${grandTotal}*%0A%0Aकृपया ऑर्डर कन्फर्म करें और मुझे UPI (8797221991) भुगतान की जानकारी दें।`;
+        window.open(`https://wa.me/918797221991?text=${orderList}`, '_blank');
+    };
+
+    window.openZoom = (url) => {
+        document.getElementById('zoomedImg').src = url;
+        document.getElementById('imageModal').style.display = 'flex';
+    };
+
+    window.checkLock = (idx) => {
+        const item = products[idx];
+        const userKey = prompt("🔐 चाबी (Code) दर्ज करें:");
+        if (userKey && userKey.trim() === (item.keyCode || "SVM@786").trim()) {
+            alert("✅ सफलता!");
+            window.open(item.productLink, '_blank');
+        } else if (userKey !== null) {
+            alert("❌ गलत चाबी!");
+        }
+    };
+
+    loadShop();
+</script>
+</body>
+</html>
